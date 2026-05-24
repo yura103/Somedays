@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 const faq = [
   {
@@ -18,20 +18,48 @@ const faq = [
   },
 ];
 
+type NotificationKey = "activities" | "follows" | "letters";
+
 export default function SettingsPage() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
 
-  const [notifications, setNotifications] = useState({
-    comments: true,
-    likes: true,
+  const [nickname, setNickname] = useState("yura");
+
+  const [userId, setUserId] = useState("yura");
+  const [isIdChecked, setIsIdChecked] = useState(true);
+  const [idMessage, setIdMessage] = useState("");
+
+  const [notifications, setNotifications] = useState<
+    Record<NotificationKey, boolean>
+  >({
+    activities: true,
     follows: true,
     letters: true,
   });
 
-  function toggleNotification(
-    key: "comments" | "likes" | "follows" | "letters"
-  ) {
+  const profileMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        profileMenuRef.current &&
+        !profileMenuRef.current.contains(event.target as Node)
+      ) {
+        setShowProfileMenu(false);
+      }
+    }
+
+    if (showProfileMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showProfileMenu]);
+
+  function toggleNotification(key: NotificationKey) {
     setNotifications((prev) => ({
       ...prev,
       [key]: !prev[key],
@@ -51,13 +79,48 @@ export default function SettingsPage() {
     setShowProfileMenu(false);
   }
 
+  function handleIdChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const validId = e.target.value.replace(/[^a-zA-Z0-9]/g, "");
+    setUserId(validId);
+    setIsIdChecked(false);
+    setIdMessage("");
+  }
+
+  function checkDuplicateId() {
+    if (!userId) {
+      setIdMessage("ID를 입력해주세요.");
+      setIsIdChecked(false);
+      return;
+    }
+
+    const existingIds = ["admin", "someday", "yura123"];
+
+    if (existingIds.includes(userId)) {
+      setIdMessage("이미 사용 중인 ID입니다. 다른 ID를 입력해주세요.");
+      setIsIdChecked(false);
+    } else {
+      setIdMessage("사용 가능한 ID입니다.");
+      setIsIdChecked(true);
+    }
+  }
+
   function saveProfile() {
+    if (!userId) {
+      alert("ID를 설정해야 저장이 가능합니다!");
+      return;
+    }
+
+    if (!isIdChecked) {
+      alert("ID 중복확인을 완료해야 저장이 가능합니다!");
+      return;
+    }
+
     alert("프로필이 저장되었어요.");
   }
 
   return (
     <main className="min-h-screen bg-[#FAFAFA] px-12 py-8 text-[#111]">
-      <div className="mx-auto max-w-[1100px]">
+      <div className="mx-auto max-w-[980px]">
         <header>
           <h1 className="text-3xl font-semibold">Settings</h1>
           <p className="mt-1 text-neutral-500">
@@ -70,7 +133,7 @@ export default function SettingsPage() {
             <h2 className="text-xl font-semibold">Profile</h2>
 
             <div className="mt-6 flex items-start gap-6">
-              <div className="relative">
+              <div className="relative" ref={profileMenuRef}>
                 <button
                   type="button"
                   onClick={() => setShowProfileMenu((prev) => !prev)}
@@ -83,7 +146,9 @@ export default function SettingsPage() {
                       className="h-full w-full object-cover"
                     />
                   ) : (
-                    "🙂"
+                    <span className="font-bold text-neutral-600">
+                      {nickname ? nickname.charAt(0) : "?"}
+                    </span>
                   )}
 
                   <div className="absolute inset-0 hidden items-center justify-center bg-black/40 text-xs text-white group-hover:flex">
@@ -123,17 +188,43 @@ export default function SettingsPage() {
                   />
 
                   <input
-                    defaultValue="yura"
+                    value={nickname}
+                    onChange={(e) => setNickname(e.target.value)}
                     className="rounded-2xl border border-neutral-200 px-5 py-4 outline-none"
                     placeholder="닉네임"
                   />
                 </div>
 
-                <input
-                  defaultValue="@yura1a2b"
-                  className="w-full rounded-2xl border border-neutral-200 px-5 py-4 outline-none"
-                  placeholder="ID"
-                />
+                <div>
+                  <div className="flex items-center gap-3">
+                    <div className="flex w-full items-center overflow-hidden rounded-2xl border border-neutral-200 px-5 focus-within:border-neutral-400">
+                      <span className="font-medium text-neutral-400">@</span>
+                      <input
+                        value={userId}
+                        onChange={handleIdChange}
+                        className="w-full bg-transparent py-4 pl-1 outline-none"
+                        placeholder="영문, 숫자만 입력 가능"
+                      />
+                    </div>
+
+                    <button
+                      onClick={checkDuplicateId}
+                      className="shrink-0 rounded-2xl border border-neutral-200 px-5 py-4 text-sm font-medium transition hover:bg-neutral-50"
+                    >
+                      중복확인
+                    </button>
+                  </div>
+
+                  {idMessage && (
+                    <p
+                      className={`ml-2 mt-2 text-xs ${
+                        isIdChecked ? "text-blue-500" : "text-red-500"
+                      }`}
+                    >
+                      {idMessage}
+                    </p>
+                  )}
+                </div>
 
                 <button
                   onClick={saveProfile}
@@ -204,13 +295,16 @@ export default function SettingsPage() {
 
           <section className="rounded-2xl bg-white p-7 shadow-sm">
             <h2 className="text-xl font-semibold">Notifications</h2>
+            <p className="mt-2 text-sm text-neutral-500">
+              여기서 알림을 꺼도 Notifications에는 계속 쌓여요.
+              웹에서는 푸시 알림이 지원되지 않아요.
+            </p>
 
             <div className="mt-6 space-y-3">
               {[
-                ["comments", "코멘트 알림"],
-                ["likes", "공감 알림"],
-                ["follows", "팔로우 알림"],
-                ["letters", "편지 리마인드"],
+                ["activities", "활동 푸시"],
+                ["follows", "팔로우 푸시"],
+                ["letters", "편지 푸시"],
               ].map(([key, label]) => (
                 <div
                   key={key}
@@ -219,15 +313,9 @@ export default function SettingsPage() {
                   <span>{label}</span>
 
                   <button
-                    onClick={() =>
-                      toggleNotification(
-                        key as "comments" | "likes" | "follows" | "letters"
-                      )
-                    }
+                    onClick={() => toggleNotification(key as NotificationKey)}
                     className={`flex h-7 w-12 items-center rounded-full p-1 transition ${
-                      notifications[
-                        key as "comments" | "likes" | "follows" | "letters"
-                      ]
+                      notifications[key as NotificationKey]
                         ? "justify-end bg-black"
                         : "justify-start bg-neutral-200"
                     }`}
@@ -253,7 +341,9 @@ export default function SettingsPage() {
                 >
                   <div className="flex items-center justify-between">
                     <p className="font-medium">{item.title}</p>
-                    <span className="text-sm text-neutral-400">{item.date}</span>
+                    <span className="text-sm text-neutral-400">
+                      {item.date}
+                    </span>
                   </div>
                 </div>
               ))}

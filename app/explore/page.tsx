@@ -116,7 +116,7 @@ export default function ExplorePage() {
 
   return (
     <main className="min-h-screen bg-[#FAFAFA] px-12 py-8 text-[#111]">
-      <div className="mx-auto max-w-[1200px]">
+      <div className="mx-auto max-w-[980px]">
         <h1 className="text-3xl font-semibold">Explore</h1>
         <p className="mt-1 text-neutral-500">
           사람들이 공개한 기록을 둘러보세요.

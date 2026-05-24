@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useLanguage } from "@/context/LanguageContext"; // 언어 컨텍스트 추가
 
 const faq = [
   {
@@ -29,6 +30,8 @@ export default function SettingsPage() {
   const [userId, setUserId] = useState("yura");
   const [isIdChecked, setIsIdChecked] = useState(true);
   const [idMessage, setIdMessage] = useState("");
+
+  const { lang, setLang } = useLanguage();
 
   const [notifications, setNotifications] = useState<
     Record<NotificationKey, boolean>
@@ -281,14 +284,20 @@ export default function SettingsPage() {
                 </select>
               </div>
 
-              <div className="flex gap-3">
-                <button className="rounded-xl border border-neutral-200 px-5 py-3 text-sm">
-                  비밀번호 초기화
-                </button>
-
-                <button className="rounded-xl border border-red-200 px-5 py-3 text-sm text-red-500">
-                  계정 삭제
-                </button>
+              <div className="flex items-end gap-4">
+                <div className="flex flex-col gap-2">
+                  <span className="text-xs text-neutral-500 font-medium ml-1">언어 (Language)</span>
+                  <select 
+                    value={lang} 
+                    onChange={(e) => setLang(e.target.value as 'ko' | 'en')}
+                    className="rounded-2xl border border-neutral-200 px-5 py-[13px] outline-none bg-white cursor-pointer"
+                  >
+                    <option value="ko">한국어 (Korean)</option>
+                    <option value="en">영어 (English)</option>
+                  </select>
+                </div>
+                <button className="rounded-xl border border-neutral-200 px-5 py-3 text-sm h-[50px]">비밀번호 초기화</button>
+                <button className="rounded-xl border border-red-200 px-5 py-3 text-sm text-red-500 h-[50px]">계정 삭제</button>
               </div>
             </div>
           </section>

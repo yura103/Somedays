@@ -1,26 +1,36 @@
-import type { Metadata } from "next";
-import { LanguageProvider } from "@/context/LanguageContext";
-import { Geist, Geist_Mono } from "next/font/google";
-import MainLayout from "@/components/MainLayout"; // 분리한 레이아웃 가져오기
+// app/layout.tsx
+import { NextIntlClientProvider } from 'next-intl';
+import { getMessages } from 'next-intl/server';
+import { LanguageProvider } from '@/context/LanguageContext';
+import { ReactNode } from 'react';
+import Sidebar from '@/components/Sidebar';
 import "./globals.css";
 
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
-
-export const metadata: Metadata = {
-  title: "Somedays",
-  description: "Journal and future letters",
-};
-
-export default function RootLayout({
+export default async function RootLayout({
   children,
-}: Readonly<{ children: React.ReactNode }>) {
+  params,
+}: {
+  children: ReactNode;
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const messages = await getMessages();
+
   return (
-    <html lang="ko">
-      <body>
-        <LanguageProvider>
-           <MainLayout>{children}</MainLayout>
-        </LanguageProvider>
+    <html lang={locale}>
+      <body className="flex min-h-screen bg-white">
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <LanguageProvider>
+            {/* 2. 테두리 선 스타일 수정: border-neutral-200 (연한 회색) */}
+            <aside className="sticky top-0 h-screen w-20 flex-shrink-0 border-r border-neutral-200 bg-white lg:w-64">
+              <Sidebar />
+            </aside>
+            
+            <main className="flex-1 overflow-y-auto">
+              {children}
+            </main>
+          </LanguageProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

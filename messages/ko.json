@@ -1,0 +1,10 @@
+{
+  "Sidebar": {
+    "home": "홈",
+    "journal": "일기",
+    "letters": "편지",
+    "explore": "탐색",
+    "notifications": "알림",
+    "settings": "설정"
+  }
+}

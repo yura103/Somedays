@@ -99,7 +99,7 @@ export default function JournalPage() {
 
   return (
     <main className="min-h-screen bg-[#FAFAFA] px-12 py-8 text-[#111]">
-      <div className="mx-auto max-w-[1480px]">
+      <div className="mx-auto max-w-[1080px]">
         <header className="mb-10">
           <h1 className="text-3xl font-semibold">Journal</h1>
           <p className="mt-1 text-neutral-500">오늘의 마음을 기록해보세요.</p>

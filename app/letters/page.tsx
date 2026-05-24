@@ -202,7 +202,7 @@ export default function LettersPage() {
 
   return (
     <main className="min-h-screen bg-[#FAFAFA] px-12 py-8 text-[#111]">
-      <div className="mx-auto max-w-[1280px]">
+      <div className="mx-auto max-w-[1080px]">
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-3xl font-semibold">Letters</h1>
